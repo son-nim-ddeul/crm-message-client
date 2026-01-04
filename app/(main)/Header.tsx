@@ -30,7 +30,14 @@ const Header = () => {
           </button>
         </nav>
         <div className="header-actions">
-          <span className="login-text">로그인</span>
+          <button
+            onClick={() =>
+              alert("베타 테스트 기간 동안 로그인 기능은 제공되지 않습니다.")
+            }
+            className="login-text"
+          >
+            로그인
+          </button>
           <Link className="start-button" href="/new">
             시작하기
           </Link>

@@ -47,7 +47,7 @@ export default function ResultPage() {
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
 
   const onReset = () => {
-    router.push("/new/persona");
+    router.push("/");
   };
 
   const onSend = () => {
@@ -57,33 +57,15 @@ export default function ResultPage() {
     );
     if (selectedResult) {
       navigator.clipboard.writeText(selectedResult.content);
-      alert("메시지가 복사되었습니다.");
+      alert("해당 기능은 준비 중입니다. 메시지가 복사되었습니다.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
-      {/* 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>이전 단계로</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <RotateCw className="w-4 h-4" />
-            <span>다시 생성하기</span>
-          </button>
-        </div>
-      </div>
-
       <div className="flex flex-col items-center pt-8">
         <NewTitle title="추천 메시지 결과" description={description} />
 
-        {/* 메시지 카드 그리드 */}
         <div className="w-full max-w-7xl px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {results.map((result) => (
@@ -107,7 +89,7 @@ export default function ResultPage() {
             onClick={onReset}
             className="px-6 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 font-semibold"
           >
-            처음부터 다시 하기
+            홈으로 돌아가기
           </button>
           <button
             className={`px-6 py-3 rounded-lg font-semibold text-white transition-colors ${

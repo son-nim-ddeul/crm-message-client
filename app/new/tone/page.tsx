@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import ToneCard from "./tone-card";
 import StepNavigation from "@/app/components/step-navigation";
+import Stepper from "@/app/components/stepper";
 import { useRouter } from "next/navigation";
 
 const TonePage = () => {
@@ -89,6 +90,7 @@ const TonePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 flex flex-col items-center">
+      <Stepper />
       <NewTitle
         title="브랜드 톤앤 매너 선택"
         description="브랜드 이미지에 맞는 말투를 선택해주시면 AI가 맞춤형 메시지를 생성해드립니다."

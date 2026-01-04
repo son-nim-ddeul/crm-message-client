@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import StepNavigation from "@/app/components/step-navigation";
+import Stepper from "@/app/components/stepper";
 import { useRouter } from "next/navigation";
 import PurposeCard from "./purpose-card";
 
@@ -91,6 +92,7 @@ const PurposePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 flex flex-col items-center">
+      <Stepper />
       <NewTitle
         title="어떤 메시지를 보내시나요?"
         description="AI가 목적에 맞는 최적의 메시지 톤앤매너를 제안합니다."

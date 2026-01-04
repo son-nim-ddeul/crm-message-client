@@ -2,6 +2,7 @@
 import NewTitle from "@/app/components/new-title";
 import PersonaCard from "@/app/new/persona/persona-card";
 import StepNavigation from "@/app/components/step-navigation";
+import Stepper from "@/app/components/stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { personas } from "./_data";
@@ -25,6 +26,7 @@ export default function PersonaPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
+      <Stepper />
       <NewTitle title={title} description={description} />
       <div className="flex flex-wrap justify-center gap-8 px-20 pb-8">
         {personas.map((persona) => (
