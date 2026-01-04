@@ -10,11 +10,11 @@ import {
   Repeat,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import React, { useState } from "react";
 import StepNavigation from "@/app/components/step-navigation";
 import Stepper from "@/app/components/stepper";
 import { useRouter } from "next/navigation";
 import PurposeCard from "./purpose-card";
+import { useMessageStore, Purpose, KPI } from "@/app/store/message-store";
 
 const PurposePage = () => {
   const purposes = [
@@ -48,11 +48,10 @@ const PurposePage = () => {
     },
   ];
 
-  const [selectedPurposeId, setSelectedPurposeId] = useState<number | null>(
-    null
-  );
+  const { purpose, setPurpose, kpis, setKpis, date, setDate } =
+    useMessageStore();
 
-  const kpis = [
+  const availableKpis = [
     {
       id: 1,
       acronym: "CPC",
@@ -79,20 +78,29 @@ const PurposePage = () => {
     },
   ];
 
-  const [selectedKpiIds, setSelectedKpiIds] = useState<number[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-
   const router = useRouter();
   const onNext = () => {
-    if (!selectedPurposeId) {
+    if (!purpose) {
       return;
     }
     router.push("/new/tone");
   };
 
+  const handlePurposeChange = (purposeItem: Purpose) => {
+    if (purpose?.id === purposeItem.id) {
+      setPurpose(null);
+    } else {
+      setPurpose({
+        id: purposeItem.id,
+        name: purposeItem.name,
+        description: purposeItem.description,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 pb-24 flex flex-col items-center">
-      <Stepper />
+      <Stepper currentStep={2} />
       <NewTitle
         title="어떤 메시지를 보내시나요?"
         description="AI가 목적에 맞는 최적의 메시지 톤앤매너를 제안합니다."
@@ -105,16 +113,12 @@ const PurposePage = () => {
             메시지 발송 목적 <span className="text-main">*</span>
           </div>
           <div className="flex flex-wrap gap-4 justify-center mt-4">
-            {purposes.map((purpose) => (
+            {purposes.map((purposeItem) => (
               <PurposeCard
-                key={purpose.id}
-                purpose={purpose}
-                selected={selectedPurposeId === purpose.id}
-                onClick={() =>
-                  selectedPurposeId === purpose.id
-                    ? setSelectedPurposeId(null)
-                    : setSelectedPurposeId(purpose.id)
-                }
+                key={purposeItem.id}
+                purpose={purposeItem}
+                selected={purpose?.id === purposeItem.id}
+                onClick={() => handlePurposeChange(purposeItem)}
               />
             ))}
           </div>
@@ -131,19 +135,17 @@ const PurposePage = () => {
           </div>
           <div className="bg-white rounded-xl p-6 border border-gray-200">
             <div className="grid grid-cols-2 gap-4">
-              {kpis.map((kpi) => {
-                const isSelected = selectedKpiIds.includes(kpi.id);
+              {availableKpis.map((kpi) => {
+                const isSelected = kpis.some((k) => k.id === kpi.id);
                 return (
                   <div
                     key={kpi.id}
                     className="flex items-start gap-3 p-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => {
                       if (isSelected) {
-                        setSelectedKpiIds(
-                          selectedKpiIds.filter((id) => id !== kpi.id)
-                        );
+                        setKpis(kpis.filter((k) => k.id !== kpi.id));
                       } else {
-                        setSelectedKpiIds([...selectedKpiIds, kpi.id]);
+                        setKpis([...kpis, kpi]);
                       }
                     }}
                   >
@@ -184,24 +186,11 @@ const PurposePage = () => {
             </div>
           </div>
         </div>
-
-        {/* 발송 예정일  */}
-        <div className="flex flex-col gap-4 mt-8">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-main" />
-            <div className="text-xl font-bold text-gray-600">
-              발송 예정일 (선택)
-            </div>
-          </div>
-          <div>
-            <DatePicker selected={selectedDate} onSelect={setSelectedDate} />
-          </div>
-        </div>
       </div>
       <StepNavigation
         onPrevious={() => router.push("/new/persona")}
         onNext={onNext}
-        nextDisabled={!selectedPurposeId}
+        nextDisabled={!purpose}
       />
     </div>
   );

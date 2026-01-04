@@ -1,37 +1,39 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const steps = [
-  { number: 1, label: "페르소나 선정" },
-  { number: 2, label: "메시지 목적" },
-  { number: 3, label: "메시지 톤 및 매너" },
-  { number: 4, label: "메시지 생성 및 성과 예측" },
+  { number: 1, label: "페르소나 선정", path: "/new/persona" },
+  { number: 2, label: "메시지 목적", path: "/new/purpose" },
+  { number: 3, label: "메시지 톤 및 매너", path: "/new/tone" },
+  { number: 4, label: "메시지 정보 입력", path: "/new/info" },
+  { number: 5, label: "메시지 발송", path: "/new/submit" },
 ];
 
-export default function Stepper() {
-  const pathname = usePathname();
+interface StepperProps {
+  currentStep: number; // 1부터 시작하는 현재 단계
+}
+
+export default function Stepper({ currentStep }: StepperProps) {
+  const router = useRouter();
 
   const getStepStatus = (stepNumber: number) => {
-    if (pathname === "/new/persona") {
-      // 1 진행중, 2,3,4 끄기
-      if (stepNumber === 1) return "active";
-      return "disabled";
+    if (stepNumber < currentStep) {
+      return "completed";
     }
-    if (pathname === "/new/purpose") {
-      // 1 완료, 2 진행중, 3,4 끄기
-      if (stepNumber === 1) return "completed";
-      if (stepNumber === 2) return "active";
-      return "disabled";
-    }
-    if (pathname === "/new/tone" || pathname === "/new/submit") {
-      // 1,2 완료, 3 진행중, 4 끄기
-      if (stepNumber === 1 || stepNumber === 2) return "completed";
-      if (stepNumber === 3) return "active";
-      return "disabled";
+    if (stepNumber === currentStep) {
+      return "active";
     }
     return "disabled";
+  };
+
+  const handleStepClick = (stepNumber: number, stepPath: string) => {
+    const status = getStepStatus(stepNumber);
+    // 완료된 단계만 클릭 가능
+    if (status === "completed") {
+      router.push(stepPath);
+    }
   };
 
   return (
@@ -41,16 +43,20 @@ export default function Stepper() {
           const status = getStepStatus(step.number);
           const isCompleted = status === "completed";
           const isActive = status === "active";
+          const isClickable = isCompleted;
 
           return (
             <div
               key={step.number}
-              className="flex flex-col items-center flex-1"
+              className={`flex flex-col items-center flex-1 ${
+                isClickable ? "cursor-pointer" : "cursor-default"
+              }`}
+              onClick={() => handleStepClick(step.number, step.path)}
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center font-semibold ${
+                className={`w-6 h-6 rounded-full flex items-center justify-center font-semibold transition-colors ${
                   isCompleted
-                    ? "bg-green-500 text-white"
+                    ? "bg-green-500 text-white hover:bg-green-600"
                     : isActive
                     ? "bg-purple-600 text-white"
                     : "bg-gray-200 text-gray-400"
@@ -65,7 +71,7 @@ export default function Stepper() {
               <span
                 className={`mt-2 text-xs font-medium ${
                   isCompleted
-                    ? "text-green-600"
+                    ? "text-green-600 hover:text-green-700"
                     : isActive
                     ? "text-purple-600"
                     : "text-gray-400"

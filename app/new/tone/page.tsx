@@ -12,12 +12,14 @@ import {
   Leaf,
   Clock,
   Shield,
+  Calendar,
 } from "lucide-react";
-import { useState } from "react";
 import ToneCard from "./tone-card";
 import StepNavigation from "@/app/components/step-navigation";
 import Stepper from "@/app/components/stepper";
 import { useRouter } from "next/navigation";
+import { Tone, useMessageStore } from "@/app/store/message-store";
+import DatePicker from "@/app/components/date-picker";
 
 const TonePage = () => {
   const router = useRouter();
@@ -79,18 +81,30 @@ const TonePage = () => {
       color: "gray",
     },
   ];
+  const { tone, setTone, date, setDate } = useMessageStore();
+
   const onNext = () => {
-    if (!selectedToneId) {
+    if (!tone) {
       return;
     }
-    router.push("/new/submit");
+    router.push("/new/info");
   };
 
-  const [selectedToneId, setSelectedToneId] = useState<number | null>(null);
+  const handleToneChange = (toneItem: Tone) => {
+    if (tone?.id === toneItem.id) {
+      setTone(null);
+    } else {
+      setTone({
+        id: toneItem.id,
+        name: toneItem.name,
+        description: toneItem.description,
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 flex flex-col items-center">
-      <Stepper />
+      <Stepper currentStep={3} />
       <NewTitle
         title="브랜드 톤앤 매너 선택"
         description="브랜드 이미지에 맞는 말투를 선택해주시면 AI가 맞춤형 메시지를 생성해드립니다."
@@ -104,34 +118,31 @@ const TonePage = () => {
             브랜드 톤앤 매너 선택 <span className="text-main">*</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {tones.map((tone) => (
+            {tones.map((toneItem) => (
               <ToneCard
-                key={tone.id}
-                tone={tone}
-                selected={selectedToneId === tone.id}
-                onClick={() =>
-                  selectedToneId === tone.id
-                    ? setSelectedToneId(null)
-                    : setSelectedToneId(tone.id)
-                }
+                key={toneItem.id}
+                tone={toneItem}
+                selected={tone?.id === toneItem.id}
+                onClick={() => handleToneChange(toneItem)}
               />
             ))}
           </div>
         </div>
 
-        {/* 추가 요청 사항 */}
-        <div className="flex flex-col gap-4">
-          <div className="text-xl font-bold text-gray-600 flex items-center gap-2">
-            <MapPlus className="w-5 h-5 text-main" />
-            추가 요청 사항
-            <span className="text-sm font-normal text-gray-400 ml-2">
-              선택사항
-            </span>
+        {/* 발송 예정일  */}
+        <div className="flex flex-col gap-4 mt-8">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-main" />
+            <div className="text-xl font-bold text-gray-600">
+              발송 예정일 (선택)
+            </div>
           </div>
           <div>
-            <textarea
-              placeholder="메시지에 꼭 포함되어야 하는 키워드나, 제외하고 싶은 표현이 있다면 적어주세요. (예: '최대 30% 할인' 문구 필수 포함, 너무 딱딱한 표현 지양)"
-              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-main focus:border-transparent"
+            <DatePicker
+              selected={date ? new Date(date) : undefined}
+              onSelect={(selectedDate) => {
+                setDate(selectedDate ? selectedDate.toISOString() : "");
+              }}
             />
           </div>
         </div>
@@ -139,7 +150,7 @@ const TonePage = () => {
       <StepNavigation
         onPrevious={() => router.push("/new/purpose")}
         onNext={onNext}
-        nextDisabled={!selectedToneId}
+        nextDisabled={!tone}
       />
     </div>
   );
