@@ -25,12 +25,12 @@ export default function PersonaPage() {
     <div className="min-h-screen bg-gray-100 pb-24">
       <Stepper currentStep={1} />
       <NewTitle title={title} description={description} />
-      <div className="flex flex-wrap justify-center gap-8 px-20 pb-8">
+      <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-8 px-20 pb-8">
         {personas.map((personaItem) => (
           <PersonaCard
             key={personaItem.idx}
             persona={personaItem}
-            onClick={() =>
+            onSelect={() =>
               persona?.idx === personaItem.idx
                 ? setPersona(null)
                 : setPersona(personaItem)

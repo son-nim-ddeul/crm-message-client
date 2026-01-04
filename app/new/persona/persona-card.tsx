@@ -1,14 +1,21 @@
+"use client";
+
 import { Persona } from "./_data";
+import { useState } from "react";
+import PersonaModal from "./persona-modal";
+import Image from "next/image";
 
 export default function PersonaCard({
   persona,
-  onClick,
+  onSelect,
   selected,
 }: {
   persona: Persona;
-  onClick: () => void;
+  onSelect: () => void;
   selected: boolean;
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // 8개
   const bgColors = [
     "bg-blue-100",
@@ -60,102 +67,80 @@ export default function PersonaCard({
     selectedBgColors[persona.idx % selectedBgColors.length];
 
   return (
-    <div
-      className={`w-[600px] h-[600px] rounded-lg p-6 border-2 cursor-pointer transition-all hover:shadow-md ${
-        selected
-          ? `${borderColor} ${selectedBgColor}`
-          : "border-gray-300 bg-white hover:border-gray-400"
-      }`}
-      onClick={onClick}
-    >
-      {/* header */}
+    <>
       <div
-        className={`flex items-center gap-2 border-b border-gray-400 pb-4 mb-4`}
+        className={`w-[280px] h-[280px] rounded-lg p-4 border-2 transition-all hover:shadow-md cursor-pointer flex flex-col ${
+          selected
+            ? `${borderColor} ${selectedBgColor}`
+            : "border-gray-300 bg-white hover:border-gray-400"
+        }`}
+        onClick={onSelect}
       >
-        <div>
+        {/* header */}
+        <div className="flex items-center gap-3 border-b border-gray-300 pb-3 mb-3 shrink-0">
           <div
-            className={`text-lg font-bold ${bgColor} ${textColor} w-12 h-12 flex items-center justify-center rounded-full`}
+            className={`text-base font-bold ${bgColor} ${textColor} w-10 h-10 flex items-center justify-center rounded-full shrink-0`}
           >
-            {persona.name.slice(0, 1).toUpperCase()}
+            <Image
+              src={`/persona/${persona.idx}.png`}
+              className="w-10 h-10 object-cover rounded-full"
+              alt={persona.name}
+              width={40}
+              height={40}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-base font-semibold text-gray-700 truncate">
+              {persona.name}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <div>{persona.age}세</div>
+              <div className="truncate">{persona.occupation}</div>
+            </div>
           </div>
         </div>
 
-        <div>
-          <div className="text-lg text-gray-700">{persona.name}</div>
-          <div className="flex items-center gap-2 text-md text-gray-500">
-            <div>{persona.age}세</div>
-            <div>{persona.occupation}</div>
+        {/* 간단한 미리보기 */}
+        <div className="mb-4 space-y-3 flex-1 overflow-hidden">
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-1">
+              쇼핑 패턴
+            </div>
+            <div className="text-xs text-gray-500 line-clamp-2">
+              {persona.shopping_pattern[0]}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-600 mb-1">
+              쇼핑 선호도
+            </div>
+            <div className="text-xs text-gray-500 line-clamp-2">
+              {persona.preferences[0]}
+            </div>
           </div>
         </div>
-        {/* <div className="text-sm text-gray-500">{persona.nickname}</div> */}
+
+        {/* 버튼 */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsModalOpen(true);
+          }}
+          className="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors shrink-0"
+        >
+          상세보기
+        </button>
       </div>
 
-      {/* content */}
-      <div className="flex flex-col gap-4">
-        <ShoppingContent
-          label="쇼핑 패턴"
-          contents={persona.shopping_pattern}
+      {/* 모달 */}
+      {isModalOpen && (
+        <PersonaModal
+          persona={persona}
+          selected={selected}
+          onSelect={onSelect}
+          onClose={() => setIsModalOpen(false)}
         />
-
-        <ShoppingContent label="쇼핑 선호도" contents={persona.preferences} />
-        <ShoppingContent label="생활 스타일" contents={persona.lifestyle} />
-        <ShoppingContent label="불편함" contents={persona.pain_points} />
-        <ShoppingContent label="고객 여정" content={persona.customer_journey} />
-      </div>
-    </div>
+      )}
+    </>
   );
 }
-
-const ShoppingContent = ({
-  label,
-  contents,
-  content,
-}: {
-  label: string;
-  contents?: string[];
-  content?: string;
-}) => {
-  // 텍스트 기반으로 색상 결정하는 함수
-  const getColorForText = (text: string) => {
-    const colors = [
-      { bg: "bg-blue-50", text: "text-blue-700" },
-      { bg: "bg-purple-50", text: "text-purple-700" },
-      { bg: "bg-pink-50", text: "text-pink-700" },
-      { bg: "bg-green-50", text: "text-green-700" },
-      { bg: "bg-yellow-50", text: "text-yellow-700" },
-      { bg: "bg-orange-50", text: "text-orange-700" },
-      { bg: "bg-indigo-50", text: "text-indigo-700" },
-      { bg: "bg-teal-50", text: "text-teal-700" },
-      { bg: "bg-cyan-50", text: "text-cyan-700" },
-      { bg: "bg-rose-50", text: "text-rose-700" },
-    ];
-
-    // 간단한 해시 함수로 텍스트를 숫자로 변환
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      hash = text.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
-  };
-
-  return (
-    <div>
-      <div className="text-sm font-bold text-gray-600">{label}</div>
-      <div className="text-gray-500 flex flex-wrap gap-2 mt-1">
-        {contents?.map((style) => {
-          const colors = getColorForText(style);
-          return (
-            <div
-              key={style}
-              className={`${colors.bg} ${colors.text} rounded-md px-2 py-1 text-xs`}
-            >
-              {style}
-            </div>
-          );
-        })}
-        {content && <div className="text-gray-500 text-sm">{content}</div>}
-      </div>
-    </div>
-  );
-};
