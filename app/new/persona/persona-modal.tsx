@@ -53,19 +53,14 @@ export default function PersonaModal({
         {/* 헤더 */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4 border-b border-gray-400 pb-4 flex-1">
-            <div>
-              <div
-                className={`text-2xl font-bold ${bgColor} ${textColor} w-16 h-16 flex items-center justify-center rounded-full`}
-              >
-                <Image
-                  src={`/persona/${persona.idx}.png`}
-                  className="w-10 h-10 object-cover rounded-full"
-                  alt={persona.name}
-                  width={40}
-                  height={40}
-                />
-              </div>
-            </div>
+            <Image
+              src={`/persona/${persona.idx}.png`}
+              className="w-16 h-16 object-cover rounded-full"
+              alt={persona.name}
+              width={40}
+              height={40}
+            />
+
             <div>
               <div className="text-2xl text-gray-700 font-bold">
                 {persona.name}

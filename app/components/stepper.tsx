@@ -56,9 +56,9 @@ export default function Stepper({ currentStep }: StepperProps) {
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center font-semibold transition-colors ${
                   isCompleted
-                    ? "bg-green-500 text-white hover:bg-green-600"
+                    ? "bg-green-500 text-white hover:bg-green-500"
                     : isActive
-                    ? "bg-purple-600 text-white"
+                    ? "bg-purple-500 text-white"
                     : "bg-gray-200 text-gray-400"
                 }`}
               >
@@ -71,9 +71,9 @@ export default function Stepper({ currentStep }: StepperProps) {
               <span
                 className={`mt-2 text-xs font-medium ${
                   isCompleted
-                    ? "text-green-600 hover:text-green-700"
+                    ? "text-green-500 hover:text-green-500"
                     : isActive
-                    ? "text-purple-600"
+                    ? "text-purple-500"
                     : "text-gray-400"
                 }`}
               >

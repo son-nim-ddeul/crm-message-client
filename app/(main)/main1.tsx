@@ -46,7 +46,7 @@ const Main1Page = () => {
           {/* 이미지 */}
           <div className="w-full max-w-5xl">
             <Image
-              src="/main1.png"
+              src="/main.png"
               alt="손님뜰 AI 메시지 생성 및 성과 예측"
               width={1200}
               height={800}
