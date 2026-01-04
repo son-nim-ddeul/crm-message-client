@@ -1,5 +1,8 @@
 "use client";
 
+import { Sparkles } from "lucide-react";
+import Link from "next/link";
+
 const Header = () => {
   const scrollToSection = (sectionNumber: number) => {
     const section = document.getElementById(`section-${sectionNumber}`);
@@ -12,7 +15,7 @@ const Header = () => {
     <header className="header">
       <div className="header-content">
         <div className="header-logo">
-          <div className="logo-icon">✨</div>
+          <Sparkles className="logo-icon" />
           <span className="logo-text">손님뜰</span>
         </div>
         <nav className="header-nav">
@@ -28,7 +31,9 @@ const Header = () => {
         </nav>
         <div className="header-actions">
           <span className="login-text">로그인</span>
-          <button className="start-button">시작하기</button>
+          <Link className="start-button" href="/new">
+            시작하기
+          </Link>
         </div>
       </div>
     </header>
