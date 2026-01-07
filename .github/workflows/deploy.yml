@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - main
+      - deploy
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  # main 브랜치: Docker 방식
+  deploy-docker:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -16,13 +19,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub (optional)
-        if: false
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
         run: |
@@ -44,31 +40,94 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           SSH_PORT: "22"
         run: |
-          # Transfer Docker image to server
           sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SSH_PORT} image.tar.gz $SSH_USER@$SSH_HOST:/tmp/
 
-          # SSH into server and deploy
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} $SSH_USER@$SSH_HOST << 'ENDSSH'
-            # Load Docker image
             docker load < /tmp/image.tar.gz
             rm /tmp/image.tar.gz
-            
-            # Stop and remove existing container
             docker stop crm-message-client || true
             docker rm crm-message-client || true
-            
-            # Run new container
             docker run -d \
               --name crm-message-client \
               --restart unless-stopped \
               -p 3000:3000 \
               crm-message-client:latest
-            
-            # Clean up old images
             docker image prune -f
           ENDSSH
 
       - name: Cleanup
         if: always()
+        run: rm -f image.tar.gz
+
+  # deploy 브랜치: PM2 방식 (GitHub Actions에서 빌드 후 전송)
+  deploy-pm2:
+    if: github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Create deployment package
         run: |
-          rm -f image.tar.gz
+          # 필요한 파일들만 압축
+          tar -czf deploy.tar.gz \
+            .next \
+            public \
+            package.json \
+            package-lock.json \
+            next.config.ts
+
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Deploy to server
+        env:
+          SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+          SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          SSH_PASSWORD: ${{ secrets.DEV_SSH_PASSWORD }}
+          SSH_PORT: "22"
+          DEPLOY_PATH: "/home/${{ secrets.SSH_USER }}/crm-message-client"
+        run: |
+          # 빌드 결과물 전송
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SSH_PORT} deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
+
+          # 서버에서 배포 실행
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} $SSH_USER@$SSH_HOST << ENDSSH
+            # 배포 디렉토리 생성
+            mkdir -p $DEPLOY_PATH
+            cd $DEPLOY_PATH
+
+            # 기존 파일 백업 및 정리
+            rm -rf .next public
+
+            # 새 빌드 결과물 압축 해제
+            tar -xzf /tmp/deploy.tar.gz -C $DEPLOY_PATH
+            rm /tmp/deploy.tar.gz
+
+            # 의존성 설치 (production only)
+            npm ci --production
+
+            # PM2로 앱 재시작
+            pm2 delete crm-message-client || true
+            pm2 start npm --name "crm-message-client" -- start
+            pm2 save
+          ENDSSH
+
+      - name: Cleanup
+        if: always()
+        run: rm -f deploy.tar.gz
