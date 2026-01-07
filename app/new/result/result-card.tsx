@@ -1,11 +1,15 @@
-import { RecommandMessage } from "@/app/types/reccomand-message";
-import { BarChart3, Brain } from "lucide-react";
+import { MessageResult, MessageType } from "@/app/store/response-store";
+import { BarChart3, Brain, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface ResultCardProps {
-  result: RecommandMessage;
+  result: MessageResult;
+  messageType: MessageType;
 }
 
-const ResultCard = ({ result }: ResultCardProps) => {
+const ResultCard = ({ result, messageType }: ResultCardProps) => {
+  const [isEstimationOpen, setIsEstimationOpen] = useState(false);
+  const [isConclusionOpen, setIsConclusionOpen] = useState(false);
   const colorClasses: Record<
     string,
     { border: string; bg: string; text: string; topBg: string }
@@ -36,8 +40,7 @@ const ResultCard = ({ result }: ResultCardProps) => {
     },
   };
 
-  const colors =
-    colorClasses[result.message_type] || colorClasses.aspirational_dreamer;
+  const colors = colorClasses[messageType] || colorClasses.aspirational_dreamer;
 
   const mapTypeToTitle = (type: string) => {
     switch (type) {
@@ -66,7 +69,7 @@ const ResultCard = ({ result }: ResultCardProps) => {
           <div
             className={`text-xs border w-fit ${colors.border} rounded-full px-4 py-1 font-semibold ${colors.text}`}
           >
-            {mapTypeToTitle(result.message_type)}
+            {mapTypeToTitle(messageType)}
           </div>
         </div>
 
@@ -79,27 +82,61 @@ const ResultCard = ({ result }: ResultCardProps) => {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 py-2">
-            <BarChart3 className="w-4 h-4 text-purple-500" />
-            <div className="text-md font-bold text-gray-600">
-              {" "}
-              평가(Estimation)
+        {/* Estimation 아코디언 */}
+        <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setIsEstimationOpen(!isEstimationOpen)}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-purple-500" />
+              <span className="text-md font-bold text-gray-600">
+                평가(Estimation)
+              </span>
+            </div>
+            <ChevronDown
+              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                isEstimationOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              isEstimationOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="p-3 text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-white">
+              {result.estimation}
             </div>
           </div>
-          <div>{result.estimation}</div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 py-2">
-            <Brain className="w-4 h-4 text-purple-500" />
-            <div className="text-md font-bold text-gray-600">
-              {" "}
-              설명(Conclusion)
+        {/* Conclusion 아코디언 */}
+        <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setIsConclusionOpen(!isConclusionOpen)}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Brain className="w-4 h-4 text-purple-500" />
+              <span className="text-md font-bold text-gray-600">
+                설명(Conclusion)
+              </span>
             </div>
-          </div>
-          <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {result.conclusion}
+            <ChevronDown
+              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                isConclusionOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              isConclusionOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="p-3 text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-white">
+              {result.conclusion}
+            </div>
           </div>
         </div>
       </div>
