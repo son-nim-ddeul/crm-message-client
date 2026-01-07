@@ -101,7 +101,7 @@ jobs:
           SSH_USER: ${{ secrets.DEV_SSH_USER }}
           SSH_PASSWORD: ${{ secrets.DEV_SSH_PASSWORD }}
           SSH_PORT: "22"
-          DEPLOY_PATH: "/home/${{ secrets.SSH_USER }}/crm-message-client"
+          DEPLOY_PATH: "/home/${{ secrets.DEV_SSH_USER }}/crm-message-client"
         run: |
           # 빌드 결과물 전송
           sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SSH_PORT} deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
