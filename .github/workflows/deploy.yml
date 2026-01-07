@@ -90,24 +90,24 @@ jobs:
             package-lock.json \
             next.config.ts
 
-      - name: Install sshpass
+      - name: Setup SSH key
         run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DEV_SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to server
         env:
           SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
           SSH_USER: ${{ secrets.DEV_SSH_USER }}
-          SSH_PASSWORD: ${{ secrets.DEV_SSH_PASSWORD }}
-          SSH_PORT: "22"
           DEPLOY_PATH: "/home/${{ secrets.DEV_SSH_USER }}/crm-message-client"
         run: |
           # 빌드 결과물 전송
-          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -P ${SSH_PORT} deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
+          scp -o StrictHostKeyChecking=no deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/
 
           # 서버에서 배포 실행
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SSH_PORT} $SSH_USER@$SSH_HOST << ENDSSH
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << ENDSSH
             # 배포 디렉토리 생성
             mkdir -p $DEPLOY_PATH
             cd $DEPLOY_PATH
