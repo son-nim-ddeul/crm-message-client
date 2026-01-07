@@ -102,7 +102,7 @@ const ResultCard = ({ result, messageType }: ResultCardProps) => {
           </button>
           <div
             className={`overflow-hidden transition-all duration-300 ${
-              isEstimationOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              isEstimationOpen ? "opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             <div className="p-3 text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-white">
@@ -131,7 +131,7 @@ const ResultCard = ({ result, messageType }: ResultCardProps) => {
           </button>
           <div
             className={`overflow-hidden transition-all duration-300 ${
-              isConclusionOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              isConclusionOpen ? "opacity-100" : "max-h-0 opacity-0"
             }`}
           >
             <div className="p-3 text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-white">
